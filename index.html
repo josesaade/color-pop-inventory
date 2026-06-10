@@ -124,6 +124,55 @@ const ENFOQUES={
 };
 
 const CATS={EE:"Elegantes",FF:"Formales",RR:"Relaxed",WW:"Weekend"};
+
+// Mapa hardcodeado id → {nombre, enfoque}
+const OUTFITS_MAP={
+  "EE01":{nombre:"EE01 - Rosada - Negro - Botas ⚫️ - Aldo - Stanley — Bites The Dust",e:"Bites The Dust"},
+  "EE02":{nombre:"EE02 - Ocre - Negro - Botas ⚫️ - Aldo - Stanley — Kurozaki Boy",e:"Kurozaki Boy"},
+  "EE03":{nombre:"EE03 - Red - Blanco - Botas ⚫️ - Aldo - Stanley — Golden Spin",e:"Golden Spin"},
+  "EE04":{nombre:"EE04 - Negro - Beige - Botas ⚫️ - Aldo - Stanley — Lost in Paradise",e:"Lost in Paradise"},
+  "EE05":{nombre:"EE05 - Naranja - Negro HM - Botas ⚫️ - Aldo - Stanley — Kurozaki Boy",e:"Kurozaki Boy"},
+  "EE06":{nombre:"EE06 - Blanco ZA - Negro ZA - Botas ⚫️ - Aldo - Stanley — Black & White",e:"Black & White"},
+  "EE07":{nombre:"EE07 - Azul - Arena - Botas 🟤 - MH - Brumatte 🔵 — Overtime",e:"Overtime"},
+  "EE08":{nombre:"EE08 - Cafe - Cafe - Stan Smith - NA - Brumatte — Golden Spin",e:"Golden Spin"},
+  "FF01":{nombre:"FF01 - Negro PB - Negro PB - Botas ⚫️ - Aldo - Stanley — Jet Black",e:"Jet Black"},
+  "FF02":{nombre:"FF02 - Azul - Beige - Botas 🟤 - MH - Brumatte 🔵 — Overtime",e:"Overtime"},
+  "FF03":{nombre:"FF03 - Vino - Negro PB - Botas ⚫️ - Aldo - Stanley — Red Bebop",e:"Red Bebop"},
+  "FF04":{nombre:"FF04 - Azul - Blanco - Nike AF1 - Bolso Adidas - Frostbuddy — Stone Ocean",e:"Stone Ocean"},
+  "FF05":{nombre:"FF05 - Verde - Negro - Adi ⚫️ - Pullandbear - Stanley — Emerald Splash",e:"Emerald Splash"},
+  "FF06":{nombre:"FF06 - Negro - Blanco - Adi ⚫️ - Aldo - Stanley — Black & White",e:"Black & White"},
+  "FF07":{nombre:"FF07 - Negro - Gris - Botas ⚫️ - Aldo - Stanley — Silver Chariot",e:"Silver Chariot"},
+  "FF08":{nombre:"FF08 - Rosado - Beige Bk - Stan Smith - NA - Brumatte — Bites The Dust",e:"Bites The Dust"},
+  "FF09":{nombre:"FF09 - Beige - Negro - Z Aldo - Aldo - Stanley — Lost in Paradise",e:"Lost in Paradise"},
+  "FF10":{nombre:"FF10 - Blanco HM - Gris - Nike AF1 - NA - Frostbuddy — Silver Chariot",e:"Silver Chariot"},
+  "FF11":{nombre:"FF11 - Beige BN - Cafe HM - Z Aldo - NA - Frostbuddy — Lost in Paradise",e:"Lost in Paradise"},
+  "FF12":{nombre:"FF12 - Gris - Blanco HM - Nike AF1 - Bolso Adidas - Frostbuddy — Silver Chariot",e:"Silver Chariot"},
+  "FF13":{nombre:"FF13 - Verde - Blanco HM - Adi ⚪️🟢 - Pullandbear - Frostbuddy — Emerald Splash",e:"Emerald Splash"},
+  "FF14":{nombre:"FF14 - Negro MD - Negro HM - Adi ⚫️ - Aldo - Stanley — Jet Black",e:"Jet Black"},
+  "FF15":{nombre:"FF15 - Blanco PB - Azul - Nike AF1 - Bolso Adidas - Frostbuddy — Stone Ocean",e:"Stone Ocean"},
+  "FF16":{nombre:"FF16 - Rojo - Negro - Adi ⚫️ - Aldo - Stanley — Red Bebop",e:"Red Bebop"},
+  "FF17":{nombre:"FF17 - Beige DT - Negro HM - Z Aldo - Aldo - Stanley — Lost in Paradise",e:"Lost in Paradise"},
+  "FF18":{nombre:"FF18 - Verde - Beige HH - Z Aldo - Pullandbear - Frostbuddy — Emerald Splash",e:"Emerald Splash"},
+  "FF19":{nombre:"FF19 - Beige - Cafe - Stan Smith - NA - Brumatte — Golden Spin",e:"Golden Spin"},
+  "FF20":{nombre:"FF20 - Morado - Negro - Adidas ⚫️ - Aldo - Stanley — Hermit Purple",e:"Hermit Purple"},
+  "RR01":{nombre:"RR01 - Azul DT - Blanco HM - Adi ⚪️🔵 - Bolso Adidas - Frostbuddy — Stone Ocean",e:"Stone Ocean"},
+  "RR02":{nombre:"RR02 - Blanco - Gris ZA - Nike AF1 - Bolso Adidas - Frostbuddy — Silver Chariot",e:"Silver Chariot"},
+  "RR03":{nombre:"RR03 - Lila DT - Beige ZA - Stan Smith - NA - Brumatte — Hermit Purple",e:"Hermit Purple"},
+  "RR04":{nombre:"RR04 - Crema - Verde HM - Z Aldo - Pullandbear - Frostbuddy — Emerald Splash",e:"Emerald Splash"},
+  "RR05":{nombre:"RR05 - Gris PB - Blanco HM - Nike AF1 - Bolso Adidas - Frostbuddy — Silver Chariot",e:"Silver Chariot"},
+  "RR06":{nombre:"RR06 - Cafe - Cafe - Stan Smith - NA - Brumatte — Golden Spin",e:"Golden Spin"},
+  "RR07":{nombre:"RR07 - Azul - Beige - Z Aldo - MH - Brumatte 🔵 — Overtime",e:"Overtime"},
+  "WW01":{nombre:"WW01 - Azul - Blanco - Adi ⚪️🔵 - NA - Frostbuddy — Stone Ocean",e:"Stone Ocean"},
+  "WW02":{nombre:"WW02 - Verde - Blanco - Adi ⚪️🟢 - Pullandbear - Frostbuddy — Emerald Splash",e:"Emerald Splash"},
+  "WW03":{nombre:"WW03 - Rosa - Negro - Adi ⚫️ - Aldo - Stanley — Bites The Dust",e:"Bites The Dust"},
+  "WW04":{nombre:"WW04 - Blanco - Azul - Nike AF1 - NA - Frostbuddy — Stone Ocean",e:"Stone Ocean"},
+  "WW05":{nombre:"WW05 - Azul - Beige - Z Aldo - MH - Stanley — Overtime",e:"Overtime"},
+  "WW06":{nombre:"WW06 - Beige - Beige - Z Aldo - NA - NA — Lost in Paradise",e:"Lost in Paradise"},
+  "WW07":{nombre:"WW07 - Negro DT - Gris - Nike Air Max - Aldo - Stanley — Silver Chariot",e:"Silver Chariot"},
+  "WW08":{nombre:"WW08 - Rojo - Negro - Adi ⚫️ - Aldo - Stanley — Red Bebop",e:"Red Bebop"},
+  "WW09":{nombre:"WW09 - Naranja - Negro - Adi ⚫️ - Aldo - Stanley — Kurozaki Boy",e:"Kurozaki Boy"},
+};
+
 let allOutfits=[];
 
 function getCat(id){return CATS[id.substring(0,2)]||'';}
@@ -131,23 +180,23 @@ function getCat(id){return CATS[id.substring(0,2)]||'';}
 async function load(){
   const dot=document.getElementById('sync-dot');
   try{
-    const r=await fetch(`${SB_URL}/rest/v1/outfits_state?key=eq.state&select=value`,{
+    const r=await fetch(`${SB_URL}/rest/v1/outfits?select=id,usado`,{
       headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
     });
     if(!r.ok) throw new Error('fetch failed');
-    const d=await r.json();
-    if(!d.length) throw new Error('no data');
-    const state=JSON.parse(d[0].value);
+    const rows=await r.json();
+    if(!rows.length) throw new Error('no data');
+    // Cruzar con el mapa hardcodeado
+    allOutfits=rows.map(row=>{
+      const meta=OUTFITS_MAP[row.id];
+      if(!meta) return null;
+      return{id:row.id, usado:row.usado, nombre:meta.nombre, e:meta.e};
+    }).filter(Boolean);
     dot.className='sync-dot ok';
-    allOutfits=state.outfits||[];
     render(allOutfits);
   }catch(e){
     dot.className='sync-dot err';
-    try{
-      const local=JSON.parse(localStorage.getItem('outfit_state')||'null');
-      if(local){allOutfits=local.outfits||[];render(allOutfits);}
-      else showError();
-    }catch(_){showError();}
+    showError();
   }
   document.getElementById('loading').classList.add('hide');
 }
