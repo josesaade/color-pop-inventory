@@ -189,17 +189,28 @@ function getCat(id){return CATS[id.substring(0,2)]||'';}
 async function load(){
   const dot=document.getElementById('sync-dot');
   try{
-    const r=await fetch(`${SB_URL}/rest/v1/outfits?select=id,usado`,{
-      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
-    });
-    if(!r.ok) throw new Error('fetch failed');
-    const rows=await r.json();
+    const [rOutfits, rHistorial] = await Promise.all([
+      fetch(`${SB_URL}/rest/v1/outfits?select=id,usado,rating`,{
+        headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+      }),
+      fetch(`${SB_URL}/rest/v1/historial?select=outfit_id,enfoque&order=fecha.desc`,{
+        headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+      })
+    ]);
+    if(!rOutfits.ok) throw new Error('fetch failed');
+    const rows=await rOutfits.json();
+    const histRows=await rHistorial.json();
     if(!rows.length) throw new Error('no data');
-    // Cruzar con el mapa hardcodeado
+
+    // Construir mapa outfit_id → enfoque desde historial + mapa hardcodeado como fallback
+    const enfFromHist={};
+    histRows.forEach(h=>{ if(!enfFromHist[h.outfit_id]) enfFromHist[h.outfit_id]=h.enfoque; });
+
     allOutfits=rows.map(row=>{
       const meta=OUTFITS_MAP[row.id];
       if(!meta) return null;
-      return{id:row.id, usado:row.usado, nombre:meta.nombre, e:meta.e};
+      const e=enfFromHist[row.id]||meta.e;
+      return{id:row.id, usado:row.usado, nombre:meta.nombre, e};
     }).filter(Boolean);
     dot.className='sync-dot ok';
     render(allOutfits);
@@ -260,7 +271,7 @@ function openSheet(enfoque){
     body.innerHTML=`<div class="sheet-empty">sin outfits disponibles</div>`;
   } else {
     body.innerHTML=disponibles.map(o=>{
-      const src=`fotos/${o.nombre}.jpg`;
+      const src=`https://uytbnqvmgalycxqnhdzb.supabase.co/storage/v1/object/public/outfits/outfits/${o.id}.jpg`;
       const prendas=o.nombre.split(' — ')[0].split(' - ').slice(1).join(' · ');
       return`<div class="outfit-row">
         <img src="${src}" class="outfit-thumb" alt="${o.id}"
