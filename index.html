@@ -190,7 +190,7 @@ async function load(){
   const dot=document.getElementById('sync-dot');
   try{
     const [rOutfits, rHistorial] = await Promise.all([
-      fetch(`${SB_URL}/rest/v1/outfits?select=id,usado,rating`,{
+      fetch(`${SB_URL}/rest/v1/outfits?select=id,usado,rating,enfoque&order=id.asc`,{
         headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
       }),
       fetch(`${SB_URL}/rest/v1/historial?select=outfit_id,enfoque&order=fecha.desc`,{
@@ -208,10 +208,10 @@ async function load(){
 
     allOutfits=rows.map(row=>{
       const meta=OUTFITS_MAP[row.id];
-      if(!meta) return null;
-      const e=enfFromHist[row.id]||meta.e;
-      return{id:row.id, usado:row.usado, nombre:meta.nombre, e};
-    }).filter(Boolean);
+      // Si no está en el mapa hardcodeado, usar el enfoque de Supabase directamente
+      const e=enfFromHist[row.id]||(meta?.e)||row.enfoque||'Silver Chariot';
+      return{id:row.id, usado:row.usado, nombre:meta?.nombre||row.id, e};
+    }).filter(o=>o.e);
     dot.className='sync-dot ok';
     render(allOutfits);
   }catch(e){
