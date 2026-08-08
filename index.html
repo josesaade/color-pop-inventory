@@ -334,6 +334,36 @@ function diffDias(a,b){ // a,b: 'YYYY-MM-DD' → días (a-b)
   return Math.round((da-db)/86400000);
 }
 
+// Misma regla de categoría por día que catPorLogica() en Outfits App
+// (Lun-Mar-Mié→FF, Jue→EE, Vie→alterna FF/EE por semana, Sáb→RR, Dom→WW).
+// No incluye eventos de calendario (elegante/Colombia/Junior/festivo) porque
+// Color Pop no consulta los iCal — es solo la base determinista por día.
+function catPorDia(date){
+  const dia=date.getDay();
+  if(dia>=1&&dia<=3) return 'FF';
+  if(dia===4) return 'EE';
+  if(dia===5){
+    const semana=Math.floor((date-new Date(date.getFullYear(),0,1))/(7*86400000));
+    return semana%2===0?'FF':'EE';
+  }
+  if(dia===6) return 'RR';
+  return 'WW';
+}
+
+// Cuenta cuántos días de cada categoría hay entre hoy (incluido) y proximoLavado (excluido)
+function proyeccionPorDias(hoyStr,proximoStr){
+  const proy={EE:0,FF:0,RR:0,WW:0};
+  if(!proximoStr) return proy;
+  let d=new Date(hoyStr+'T00:00:00');
+  const fin=new Date(proximoStr+'T00:00:00');
+  while(d<fin){
+    const c=catPorDia(d);
+    if(proy[c]!==undefined) proy[c]++;
+    d=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);
+  }
+  return proy;
+}
+
 function renderWash(outfits, historial, cfg){
   const panel=document.getElementById('wash-panel');
   if(!cfg||!cfg.ultimo_lavado){ panel.style.display='none'; return; }
@@ -341,9 +371,10 @@ function renderWash(outfits, historial, cfg){
 
   const hoy=new Date().toISOString().slice(0,10);
   const metaDias=cfg.meta_dias||20;
-  const proximo=cfg.proximo_lavado||null;
-  const diasRestantes=Math.max(0, proximo?diffDias(proximo,hoy):(metaDias-diffDias(hoy,cfg.ultimo_lavado)));
-  const diasTranscurridos=Math.max(1, diffDias(hoy,cfg.ultimo_lavado));
+  // proximo_lavado manda porque se puede ajustar manualmente (adelantar/atrasar el ciclo);
+  // solo si no existe se calcula desde último_lavado + meta_dias como respaldo.
+  const proximoEfectivo=cfg.proximo_lavado||null;
+  const diasRestantes=Math.max(0, proximoEfectivo?diffDias(proximoEfectivo,hoy):(metaDias-diffDias(hoy,cfg.ultimo_lavado)));
 
   document.getElementById('wash-days').textContent=diasRestantes;
   document.getElementById('wash-label').textContent=diasRestantes===1?'día para lavar':'días para lavar';
@@ -351,38 +382,37 @@ function renderWash(outfits, historial, cfg){
 
   // disponibles/total por categoría
   const catStats={};
-  Object.keys(CATS).forEach(c=>catStats[c]={disp:0,total:0,usosCiclo:0});
+  Object.keys(CATS).forEach(c=>catStats[c]={disp:0,total:0});
   outfits.forEach(o=>{
     const c=o.id.substring(0,2);
     if(!catStats[c]) return;
     catStats[c].total++;
     if(!o.usado) catStats[c].disp++;
   });
-  historial.forEach(h=>{
-    if(!h.fecha||h.fecha<cfg.ultimo_lavado) return;
-    const c=(h.outfit_id||'').substring(0,2);
-    if(catStats[c]) catStats[c].usosCiclo++;
-  });
+
+  // proyección exacta por regla de día de la semana, para los días que faltan del ciclo
+  const proy=proyeccionPorDias(hoy, proximoEfectivo);
 
   const body=document.getElementById('wash-body');
   body.innerHTML=Object.keys(CATS).map(c=>{
     const s=catStats[c];
-    const tasaDia=s.usosCiclo/diasTranscurridos;
-    const proyeccion=Math.ceil(tasaDia*diasRestantes);
-    let statusClass='na', statusLbl='sin datos';
-    if(s.usosCiclo>0){
+    const proyeccion=proy[c]||0;
+    let statusClass='ok', statusLbl='alcanza';
+    if(proyeccion>0){
       if(s.disp>=proyeccion){ statusClass='ok'; statusLbl='alcanza'; }
       else if(s.disp>=proyeccion*0.5){ statusClass='tight'; statusLbl='ajustado'; }
       else{ statusClass='risk'; statusLbl='no alcanza'; }
+    } else {
+      statusClass='na'; statusLbl='no se necesita';
     }
     return `<div class="wash-row">
         <span class="wash-cat-dot" style="background:${CATS_COLOR[c]}"></span>
         <span class="wash-cat-name">${CATS[c]}</span>
-        <span class="wash-cat-count">${s.disp}/${s.total} disp${s.usosCiclo>0?` · ~${proyeccion} proy.`:''}</span>
+        <span class="wash-cat-count">${s.disp}/${s.total} disp${proyeccion>0?` · ${proyeccion} días proy.`:''}</span>
         <span class="wash-status ${statusClass}">${statusLbl}</span>
       </div>`;
   }).join('');
-  body.innerHTML+=`<div class="wash-foot">estimado según uso desde el último lavado (${cfg.ultimo_lavado})</div>`;
+  body.innerHTML+=`<div class="wash-foot">proyección según la regla FF lun-mié · EE jue/vie · RR sáb · WW dom, hasta ${proximoEfectivo||'—'}</div>`;
 }
 
 function toggleWash(){
