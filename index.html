@@ -237,13 +237,14 @@ async function load(){
   const H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
   try{
     const [rOutfits, rHistorial, rPrendas, rConfig] = await Promise.all([
-      fetch(`${SB_URL}/rest/v1/outfits?select=id,usado,rating,enfoque&order=id.asc`,{headers:H}),
+      fetch(`${SB_URL}/rest/v1/outfits?select=id,usado,rating,enfoque,derogado&order=id.asc`,{headers:H}),
       fetch(`${SB_URL}/rest/v1/historial?select=outfit_id,enfoque,fecha&order=fecha.desc`,{headers:H}),
       fetch(`${SB_URL}/rest/v1/prendas?select=codigo,tipo,subtipo,marca,color,modelo,outfit_id`,{headers:H}),
       fetch(`${SB_URL}/rest/v1/config?select=ultimo_lavado,proximo_lavado,meta_dias`,{headers:H})
     ]);
     if(!rOutfits.ok) throw new Error('fetch failed');
-    const rows=await rOutfits.json();
+    const rowsAll=await rOutfits.json();
+    const rows=rowsAll.filter(r=>!r.derogado); // los derogados no se muestran ni cuentan como disponibles
     const histRows=await rHistorial.json();
     if(!rows.length) throw new Error('no data');
 
