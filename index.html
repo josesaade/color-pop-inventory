@@ -192,7 +192,7 @@ function cn(hex){return COLORES[hex]||'';}
 // outfit_id → {camisa,pantalon,calzado,bolso,accesorio} cada uno {codigo,subtipo,marca,color,modelo}
 let PRENDAS_MAP_CP={};
 // Slots opcionales: reloj, collar y hasta dos pulseras
-const EXTRAS_CP=[{k:'reloj',lbl:'Reloj',folder:'relojes'},{k:'collar',lbl:'Collar',folder:'collares'},{k:'pulsera',lbl:'Pulsera',folder:'pulseras'},{k:'pulsera2',lbl:'Pulsera 2',folder:'pulseras'}];
+const EXTRAS_CP=[{k:'reloj',lbl:'Reloj',folder:'relojes'},{k:'collar',lbl:'Collar',folder:'collares'},{k:'pulsera',lbl:'Pulsera',folder:'pulseras'},{k:'pulsera2',lbl:'Pulsera 2',folder:'pulseras'},{k:'pulsera3',lbl:'Pulsera 3',folder:'pulseras'}];
 
 // Mapa hardcodeado id → {nombre, enfoque}
 const OUTFITS_MAP={
@@ -294,7 +294,7 @@ async function load(){
         p.outfit_id.split(',').map(s=>s.trim()).filter(Boolean).forEach(oid=>{
           if(!PRENDAS_MAP_CP[oid]) PRENDAS_MAP_CP[oid]={};
           let key=p.tipo;
-          if(key==='pulsera'&&PRENDAS_MAP_CP[oid].pulsera) key='pulsera2';
+          if(key==='pulsera'&&PRENDAS_MAP_CP[oid].pulsera) key=PRENDAS_MAP_CP[oid].pulsera2?'pulsera3':'pulsera2';
           PRENDAS_MAP_CP[oid][key]={codigo:p.codigo,subtipo:p.subtipo,marca:p.marca,color:p.color,modelo:p.modelo};
         });
       });
@@ -576,7 +576,7 @@ function outfitCardHTML(o,enf){
         ${pitemHTML('Calzado','calzado',pm.calzado,calF)}
         ${pitemHTML('Bolso','bolso',pm.bolso,bolF)}
         ${pitemHTML('Termo','accesorio',pm.accesorio,terF)}
-        ${EXTRAS_CP.filter(e=>pm[e.k]).map(e=>pitemHTML((e.k==='pulsera'&&!pm.pulsera2)?'Pulsera':e.lbl,e.k,pm[e.k],pm[e.k].codigo?`${STORAGE}/${e.folder}/${pm[e.k].codigo}.jpg`:null)).join('')}
+        ${EXTRAS_CP.filter(e=>pm[e.k]).map(e=>pitemHTML(e.k==='pulsera'?(pm.pulsera2?'Pulsera 1':'Pulsera'):e.lbl,e.k,pm[e.k],pm[e.k].codigo?`${STORAGE}/${e.folder}/${pm[e.k].codigo}.jpg`:null)).join('')}
       </div>
     </div>`;
 }
