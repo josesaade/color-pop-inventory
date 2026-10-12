@@ -180,19 +180,22 @@ const ENFOQUES={
   "Golden Spin":{color:"#8B6914",label:"cafés"},
   "Jet Black":{color:"#111111",label:"negro"},
   "Hermit Purple":{color:"#9B59B6",label:"violeta y lila"},
-  "Weekend":{color:"#FFD700",label:"dorado"}
+  "Weekend":{color:"#FFD700",label:"dorado"},
+  "Entrenamiento":{color:"#E63946",label:"ropa deportiva"}
 };
 
-const CATS={EE:"Elegantes",FF:"Formales",RR:"Relaxed",WW:"Weekend"};
-const CATS_COLOR={EE:"#7F77DD",FF:"#378ADD",RR:"#1D9E75",WW:"#BA7517"};
+const CATS={EE:"Elegantes",FF:"Formales",RR:"Relaxed",WW:"Weekend",SS:"Sport"};
+const CATS_COLOR={EE:"#7F77DD",FF:"#378ADD",RR:"#1D9E75",WW:"#BA7517",SS:"#D85A30"};
 const STORAGE='https://uytbnqvmgalycxqnhdzb.supabase.co/storage/v1/object/public/outfits';
-const COLORES={'#1a1916':'Negro','#f5f4f0':'Blanco','#4A90C4':'Azul claro','#1E3A8A':'Azul rey','#1a2a4a':'Azul oscuro','#C0392B':'Rojo','#6B1A1A':'Vinotinto','#E07B2A':'Naranja','#C4C4C0':'Gris claro','#9E9E9E':'Gris medio','#555555':'Gris oscuro','#C4A882':'Beige','#D8C8A8':'Arena','#E8DCC4':'Crema','#8FBC8F':'Verde claro','#639922':'Verde oliva','#2d5a2d':'Verde oscuro','#E8A0B4':'Rosado','#C2185B':'Fucsia','#C9A8E0':'Lila','#9B59B6':'Violeta','#3E2723':'Café oscuro','#8D6E63':'Café claro','#7D8B99':'Acero','#C9A227':'Dorado','linear-gradient(135deg,#f5f4f0 50%,#1a1916 50%)':'Nevado (blanco y negro)','linear-gradient(135deg,#4A90C4 50%,#f5f4f0 50%)':'Glaciar (azul y blanco)','#0E9F6E':'Verde esmeralda'};
+const COLORES={'#1a1916':'Negro','#f5f4f0':'Blanco','#4A90C4':'Azul claro','#1E3A8A':'Azul rey','#1a2a4a':'Azul oscuro','#C0392B':'Rojo','#6B1A1A':'Vinotinto','#E07B2A':'Naranja','#C4C4C0':'Gris claro','#9E9E9E':'Gris medio','#555555':'Gris oscuro','#C4A882':'Beige','#D8C8A8':'Arena','#E8DCC4':'Crema','#8FBC8F':'Verde claro','#639922':'Verde oliva','#2d5a2d':'Verde oscuro','#E8A0B4':'Rosado','#C2185B':'Fucsia','#C9A8E0':'Lila','#9B59B6':'Violeta','#3E2723':'Café oscuro','#8D6E63':'Café claro','#7D8B99':'Acero','#C9A227':'Dorado','linear-gradient(135deg,#f5f4f0 50%,#1a1916 50%)':'Nevado (blanco y negro)','linear-gradient(135deg,#4A90C4 50%,#f5f4f0 50%)':'Glaciar (azul y blanco)','#0E9F6E':'Verde esmeralda','#E5E4E2':'Platino'};
 function cn(hex){return COLORES[hex]||'';}
 
 // outfit_id → {camisa,pantalon,calzado,bolso,accesorio} cada uno {codigo,subtipo,marca,color,modelo}
 let PRENDAS_MAP_CP={};
 // Slots opcionales: reloj, collar y hasta dos pulseras
-const EXTRAS_CP=[{k:'reloj',lbl:'Reloj',folder:'relojes'},{k:'collar',lbl:'Collar',folder:'collares'},{k:'pulsera',lbl:'Pulsera',folder:'pulseras'},{k:'pulsera2',lbl:'Pulsera 2',folder:'pulseras'},{k:'pulsera3',lbl:'Pulsera 3',folder:'pulseras'}];
+const FOLDER_PREFIX_CP={CDE:'camisetas_dep',PDE:'pantalonetas_dep',MDE:'medias_dep'};
+function sportFotoCP(p){return p&&FOLDER_PREFIX_CP[(p.codigo||'').substring(0,3)]?`${STORAGE}/${FOLDER_PREFIX_CP[p.codigo.substring(0,3)]}/${p.codigo}.jpg`:null;}
+const EXTRAS_CP=[{k:'medias',lbl:'Medias',folder:'medias_dep'},{k:'reloj',lbl:'Reloj',folder:'relojes'},{k:'collar',lbl:'Collar',folder:'collares'},{k:'pulsera',lbl:'Pulsera',folder:'pulseras'},{k:'pulsera2',lbl:'Pulsera 2',folder:'pulseras'},{k:'pulsera3',lbl:'Pulsera 3',folder:'pulseras'}];
 
 // Mapa hardcodeado id → {nombre, enfoque}
 const OUTFITS_MAP={
@@ -294,6 +297,7 @@ async function load(){
         p.outfit_id.split(',').map(s=>s.trim()).filter(Boolean).forEach(oid=>{
           if(!PRENDAS_MAP_CP[oid]) PRENDAS_MAP_CP[oid]={};
           let key=p.tipo;
+          if(key==='camiseta_dep') key='camisa'; else if(key==='pantaloneta_dep') key='pantalon'; else if(key==='medias_dep') key='medias';
           if(key==='pulsera'&&PRENDAS_MAP_CP[oid].pulsera) key=PRENDAS_MAP_CP[oid].pulsera2?'pulsera3':'pulsera2';
           PRENDAS_MAP_CP[oid][key]={codigo:p.codigo,subtipo:p.subtipo,marca:p.marca,color:p.color,modelo:p.modelo};
         });
@@ -571,8 +575,8 @@ function outfitCardHTML(o,enf){
         </div>
       </div>
       <div class="ocard-grid">
-        ${pitemHTML('Camisa','camisa',pm.camisa,null)}
-        ${pitemHTML('Pantalón','pantalon',pm.pantalon,null)}
+        ${pitemHTML('Camisa','camisa',pm.camisa,sportFotoCP(pm.camisa))}
+        ${pitemHTML('Pantalón','pantalon',pm.pantalon,sportFotoCP(pm.pantalon))}
         ${pitemHTML('Calzado','calzado',pm.calzado,calF)}
         ${pitemHTML('Bolso','bolso',pm.bolso,bolF)}
         ${pitemHTML('Termo','accesorio',pm.accesorio,terF)}
