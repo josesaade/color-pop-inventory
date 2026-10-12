@@ -126,6 +126,7 @@
   <div class="tabs">
     <div class="tab active" id="tab-disponibles" onclick="switchTab('disponibles')">disponibles</div>
     <div class="tab" id="tab-rotacion" onclick="switchTab('rotacion')">rotación</div>
+    <div class="tab" id="tab-sport" onclick="switchTab('sport')">sport</div>
   </div>
   <div id="view-disponibles" style="display:flex;flex-direction:column;flex:1;min-height:0;">
     <div class="wash-panel" id="wash-panel" style="display:none;">
@@ -146,6 +147,7 @@
     </div>
   </div>
   <div id="view-rotacion" class="rot-view" style="display:none;"></div>
+  <div id="view-sport" class="rot-view" style="display:none;"></div>
   <div class="loading" id="loading">
     <div class="spinner"></div>
     <div class="loading-text">cargando</div>
@@ -255,6 +257,7 @@ const OUTFITS_MAP={
 
 let allOutfits=[];
 
+function esSS(id){return (id||'').substring(0,2)==='SS';}
 function getCat(id){return CATS[id.substring(0,2)]||'';}
 
 let lastConfig=null, lastHistorial=[];
@@ -311,9 +314,13 @@ async function load(){
     }
 
     dot.className='sync-dot ok';
-    render(allOutfits);
-    renderWash(allOutfits, lastHistorial, lastConfig);
-    renderRotacion(allOutfits, lastHistorial, lastConfig);
+    // Los outfits deportivos (SS) quedan fuera de disponibles, lavado y rotación: tienen su propia vista
+    const regulares=allOutfits.filter(o=>!esSS(o.id));
+    const histReg=lastHistorial.filter(h=>!esSS(h.outfit_id));
+    render(regulares);
+    renderWash(regulares, histReg, lastConfig);
+    renderRotacion(regulares, histReg, lastConfig);
+    renderSport(allOutfits.filter(o=>esSS(o.id)), lastHistorial.filter(h=>esSS(h.outfit_id)));
   }catch(e){
     dot.className='sync-dot err';
     showError();
@@ -331,7 +338,7 @@ function render(outfits){
   });
   const totalDisp=Object.values(disp).reduce((a,b)=>a+b,0);
   const totalAll=outfits.length;
-  const sorted=Object.keys(ENFOQUES).sort((a,b)=>disp[b]-disp[a]);
+  const sorted=Object.keys(ENFOQUES).filter(e=>e!=='Entrenamiento').sort((a,b)=>disp[b]-disp[a]);
   const grid=document.getElementById('grid');
   grid.innerHTML=sorted.map((e,i)=>{
     const c=ENFOQUES[e].color;
@@ -365,6 +372,28 @@ function switchTab(tab){
   document.getElementById('tab-rotacion').classList.toggle('active',tab==='rotacion');
   document.getElementById('view-disponibles').style.display=tab==='disponibles'?'flex':'none';
   document.getElementById('view-rotacion').style.display=tab==='rotacion'?'block':'none';
+  document.getElementById('tab-sport').classList.toggle('active',tab==='sport');
+  document.getElementById('view-sport').style.display=tab==='sport'?'block':'none';
+}
+
+// ── sport: historial propio de los outfits deportivos (no afecta enfoques ni lavado) ──
+function renderSport(outfits, historial){
+  const el=document.getElementById('view-sport');
+  if(!el) return;
+  const hoy=new Date().toISOString().slice(0,10);
+  const hace=n=>{const d=new Date(hoy+'T00:00:00');d.setDate(d.getDate()-n);return d.toISOString().slice(0,10);};
+  const s7=historial.filter(h=>h.fecha>=hace(6)).length;
+  const s30=historial.filter(h=>h.fecha>=hace(29)).length;
+  const porId={};
+  historial.forEach(h=>{ (porId[h.outfit_id]=porId[h.outfit_id]||[]).push(h.fecha); });
+  const c=ENFOQUES['Entrenamiento'].color;
+  const filas=outfits.map(o=>{
+    const f=(porId[o.id]||[]).sort().reverse();
+    const dias=f[0]?diffDias(hoy,f[0]):null;
+    return {id:o.id,n:f.length,dias};
+  }).sort((a,b)=>b.n-a.n);
+  el.innerHTML=`<div class="rot-card"><span class="rot-dot" style="background:${c};"></span><div class="rot-body"><div class="rot-name">entrenamiento</div><div class="rot-freq">${s7} sesiones esta semana · ${s30} en 30 días</div><div class="rot-last">${historial.length} en total · no cuenta en enfoques ni en el ciclo de lavado</div></div></div>`
+    + (filas.length?filas.map(f=>`<div class="rot-card"><span class="rot-dot" style="background:${c};"></span><div class="rot-body"><div class="rot-name">${f.id}</div><div class="rot-freq">${f.n} ${f.n===1?'uso':'usos'}</div><div class="rot-last">${f.dias===null?'sin uso aún':f.dias===0?'usado hoy':`hace ${f.dias} día${f.dias===1?'':'s'}`}</div></div></div>`).join(''):'<div class="rot-foot">aún no hay outfits SS</div>');
 }
 
 // ── rotación de enfoques ──
@@ -490,7 +519,7 @@ function renderWash(outfits, historial, cfg){
   const proy=proyeccionPorDias(hoy, proximoEfectivo);
 
   const body=document.getElementById('wash-body');
-  body.innerHTML=Object.keys(CATS).map(c=>{
+  body.innerHTML=Object.keys(CATS).filter(c=>c!=='SS').map(c=>{
     const s=catStats[c];
     const proyeccion=proy[c]||0;
     let statusClass='ok', statusLbl='alcanza';
