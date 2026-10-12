@@ -195,7 +195,7 @@ let PRENDAS_MAP_CP={};
 // Slots opcionales: reloj, collar y hasta dos pulseras
 const FOLDER_PREFIX_CP={CDE:'camisetas_dep',PDE:'pantalonetas_dep',MDE:'medias_dep'};
 function sportFotoCP(p){return p&&FOLDER_PREFIX_CP[(p.codigo||'').substring(0,3)]?`${STORAGE}/${FOLDER_PREFIX_CP[p.codigo.substring(0,3)]}/${p.codigo}.jpg`:null;}
-const EXTRAS_CP=[{k:'medias',lbl:'Medias',folder:'medias_dep'},{k:'reloj',lbl:'Reloj',folder:'relojes'},{k:'collar',lbl:'Collar',folder:'collares'},{k:'pulsera',lbl:'Pulsera',folder:'pulseras'},{k:'pulsera2',lbl:'Pulsera 2',folder:'pulseras'},{k:'pulsera3',lbl:'Pulsera 3',folder:'pulseras'}];
+const EXTRAS_CP=[{k:'medias',lbl:'Medias',folder:'medias_dep'},{k:'reloj',lbl:'Reloj',folder:'relojes'},{k:'collar',lbl:'Collar',folder:'collares'},{k:'anillo',lbl:'Anillo',folder:'anillos'},{k:'pulsera',lbl:'Pulsera',folder:'pulseras'},{k:'pulsera2',lbl:'Pulsera 2',folder:'pulseras'},{k:'pulsera3',lbl:'Pulsera 3',folder:'pulseras'}];
 
 // Mapa hardcodeado id → {nombre, enfoque}
 const OUTFITS_MAP={
