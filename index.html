@@ -274,8 +274,12 @@ async function load(){
     ]);
     if(!rOutfits.ok) throw new Error('fetch failed');
     const rowsAll=await rOutfits.json();
-    const rows=rowsAll.filter(r=>!r.derogado); // los derogados no se muestran ni cuentan como disponibles
+    // Variantes (WW08V2…): comparten camiseta con el base; en rotación/stats se cuentan como el base.
+    const baseDeCP=id=>(id||'').replace(/(?<=\d)V\d+$/,'');
+    const esVarCP=id=>/^[A-Z]{2}\d+V\d+$/.test(id||'');
+    const rows=rowsAll.filter(r=>!r.derogado&&!esVarCP(r.id)); // los derogados y las variantes no se listan
     const histRows=await rHistorial.json();
+    histRows.forEach(h=>{h.outfit_id=baseDeCP(h.outfit_id);});
     if(!rows.length) throw new Error('no data');
 
     // Construir mapa outfit_id → enfoque desde historial + mapa hardcodeado como fallback
